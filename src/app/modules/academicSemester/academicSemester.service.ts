@@ -88,3 +88,20 @@ export const getAcademicSemesterById = async (
 
   return res;
 };
+export const updateAcademicSemesterById = async (
+  id: string,
+  data: Partial<AcademicSemester>,
+): Promise<AcademicSemester> => {
+  const res = await prisma.academicSemester.update({
+    data,
+    where: {
+      id,
+    },
+  });
+
+  if (!res) {
+    throw new ApiError("Failed to update academic semester data by id", 404);
+  }
+
+  return res;
+};

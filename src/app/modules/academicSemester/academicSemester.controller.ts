@@ -18,7 +18,7 @@ export const createAcademicSemester = catchAsync(
       req.body,
     );
     sendResponse<AcademicSemester>(res, {
-      statusCode: httpStatus.OK,
+      statusCode: httpStatus.CREATED,
       success: true,
       message: "Successfully created academic semester",
       data: result,
@@ -53,6 +53,20 @@ export const getAcademicSemesterById = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Successfully retrieved academic semester information",
+      data: result,
+    });
+  },
+);
+export const updateAcademicSemesterById = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await academicSemesterService.updateAcademicSemesterById(
+      req.params.id,
+      req.body,
+    );
+    sendResponse<AcademicSemester>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully updated academic semester information",
       data: result,
     });
   },
