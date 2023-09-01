@@ -105,3 +105,18 @@ export const updateAcademicSemesterById = async (
 
   return res;
 };
+export const deleteAcademicSemesterById = async (
+  id: string,
+): Promise<AcademicSemester> => {
+  const res = await prisma.academicSemester.delete({
+    where: {
+      id,
+    },
+  });
+
+  if (!res) {
+    throw new ApiError("Failed to delete academic semester data by id", 404);
+  }
+
+  return res;
+};

@@ -71,3 +71,16 @@ export const updateAcademicSemesterById = catchAsync(
     });
   },
 );
+export const deleteAcademicSemesterById = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await academicSemesterService.deleteAcademicSemesterById(
+      req.params.id,
+    );
+    sendResponse<AcademicSemester>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully deleted academic semester information",
+      data: result,
+    });
+  },
+);

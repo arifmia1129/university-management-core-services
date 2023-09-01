@@ -16,6 +16,7 @@ router.post(
 router
   .route("/:id")
   .get(academicSemesterController.getAcademicSemesterById)
+  .delete(academicSemesterController.deleteAcademicSemesterById)
   .patch(
     requestValidator(
       academicSemesterValidation.updateAcademicSemesterValidation,
