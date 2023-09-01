@@ -4,6 +4,13 @@ import * as academicSemesterService from "./academicSemester.service";
 import sendResponse from "../../../shared/sendResponse";
 import { AcademicSemester } from "@prisma/client";
 import httpStatus from "../../../shared/httpStatus";
+import pick from "../../../shared/pick";
+import { paginationField } from "../../constant/pagination";
+import {
+  Filter,
+  Pagination,
+} from "../../../interfaces/databaseQuery.interface";
+import { academicSemesterFilterableField } from "./academicSemester.constant";
 
 export const createAcademicSemester = catchAsync(
   async (req: Request, res: Response) => {
@@ -21,8 +28,13 @@ export const createAcademicSemester = catchAsync(
 
 export const getAllAcademicSemester = catchAsync(
   async (req: Request, res: Response) => {
-    const result =
-      await academicSemesterService.getAllAcademicSemesterService();
+    const filters: Filter = pick(req.query, academicSemesterFilterableField);
+    const paginationOptions: Pagination = pick(req.query, paginationField);
+
+    const result = await academicSemesterService.getAllAcademicSemesterService(
+      filters,
+      paginationOptions,
+    );
     sendResponse<AcademicSemester[]>(res, {
       statusCode: httpStatus.OK,
       success: true,

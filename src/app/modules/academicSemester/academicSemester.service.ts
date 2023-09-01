@@ -1,5 +1,11 @@
-import { PrismaClient, AcademicSemester } from "@prisma/client";
-import { ResponseWithPagination } from "../../../interfaces/databaseQuery.interface";
+import { PrismaClient, AcademicSemester, Prisma } from "@prisma/client";
+import {
+  Filter,
+  Pagination,
+  ResponseWithPagination,
+} from "../../../interfaces/databaseQuery.interface";
+import { paginationHelper } from "../../../helpers/paginationHelper";
+import { academicSemesterSearchableField } from "./academicSemester.constant";
 
 const prisma = new PrismaClient();
 
@@ -11,8 +17,49 @@ export const createAcademicSemesterService = async (
   });
 };
 
-export const getAllAcademicSemesterService = async ():Promise<ResponseWithPagination<AcademicSemester[]>> => {
-  const result = await prisma.academicSemester.findMany();
+export const getAllAcademicSemesterService = async (
+  filters: Filter,
+  options: Pagination,
+): Promise<ResponseWithPagination<AcademicSemester[]>> => {
+  const { limit, skip, sortOrder, sortBy } =
+    paginationHelper.calculatePagination(options);
+
+  const andConditions = [];
+
+  const { searchTerm, ...filterData } = filters;
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: academicSemesterSearchableField.map(field => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length) {
+    andConditions.push({
+      AND: Object.keys(filterData).map(key => ({
+        [key]: {
+          equals: filterData[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.AcademicSemesterWhereInput =
+    andConditions?.length ? { AND: andConditions } : {};
+
+  const result = await prisma.academicSemester.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy as string]: sortOrder,
+    },
+  });
 
   const total = await prisma.academicSemester.count();
 
