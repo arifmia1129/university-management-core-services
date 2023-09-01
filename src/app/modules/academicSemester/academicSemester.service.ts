@@ -1,4 +1,4 @@
-import { PrismaClient, AcademicSemester, Prisma } from "@prisma/client";
+import { AcademicSemester, Prisma } from "@prisma/client";
 import {
   Filter,
   Pagination,
@@ -6,8 +6,8 @@ import {
 } from "../../../interfaces/databaseQuery.interface";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { academicSemesterSearchableField } from "./academicSemester.constant";
-
-const prisma = new PrismaClient();
+import prisma from "../../../shared/prisma";
+import ApiError from "../../../errors/ApiError";
 
 export const createAcademicSemesterService = async (
   semester: AcademicSemester,
@@ -71,4 +71,20 @@ export const getAllAcademicSemesterService = async (
     },
     data: result,
   };
+};
+
+export const getAcademicSemesterById = async (
+  id: string,
+): Promise<AcademicSemester> => {
+  const res = await prisma.academicSemester.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!res) {
+    throw new ApiError("Failed to retrieved academic semester data by id", 404);
+  }
+
+  return res;
 };

@@ -44,3 +44,16 @@ export const getAllAcademicSemester = catchAsync(
     });
   },
 );
+export const getAcademicSemesterById = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await academicSemesterService.getAcademicSemesterById(
+      req.params.id,
+    );
+    sendResponse<AcademicSemester>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully retrieved academic semester information",
+      data: result,
+    });
+  },
+);
