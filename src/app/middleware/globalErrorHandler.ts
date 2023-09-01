@@ -7,8 +7,6 @@ import { errorLogger } from "../../shared/logger";
 import { ZodError } from "zod";
 import handleZodError from "../../errors/handleZodError";
 import handleCastError from "../../errors/handleCastError";
-import mongoose from "mongoose";
-import handleMongoServerError from "../../errors/handleMongoServerError";
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
@@ -32,11 +30,13 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     errorMessages = handleZodError(err);
     statusCode = 400;
     message = "Validation error";
-  } else if (err instanceof mongoose.mongo.MongoServerError) {
-    statusCode = 400;
-    message = "Duplicate entry error";
-    errorMessages = handleMongoServerError(err);
-  } else if (err instanceof ApiError) {
+  }
+  // else if (err instanceof mongoose.mongo.MongoServerError) {
+  //   statusCode = 400;
+  //   message = "Duplicate entry error";
+  //   errorMessages = handleMongoServerError(err);
+  // }
+  else if (err instanceof ApiError) {
     statusCode = err.statusCode;
     message = err.message;
     errorMessages = [

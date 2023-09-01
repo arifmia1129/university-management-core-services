@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import app from "./app";
 import config from "./config";
 import { errorLogger, infoLogger } from "./shared/logger";
@@ -19,9 +18,6 @@ process.on("uncaughtException", err => {
 });
 async function main() {
   try {
-    await mongoose.connect(config.db_url as string);
-    infoLogger.info("DB Connected!");
-
     server = app.listen(config.port, () => {
       infoLogger.info(`Application is listening on port ${config.port}`);
     });
