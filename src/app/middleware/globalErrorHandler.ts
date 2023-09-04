@@ -7,6 +7,7 @@ import { errorLogger } from "../../shared/logger";
 import { ZodError } from "zod";
 import handleZodError from "../../errors/handleZodError";
 import handleCastError from "../../errors/handleCastError";
+import { Prisma } from "@prisma/client";
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
@@ -18,7 +19,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let message: string = "Something went wrong";
   let errorMessages: ErrorMessage[] = [];
 
-  if (err.name === "ValidationError") {
+  if (err instanceof Prisma.PrismaClientValidationError) {
     errorMessages = handleValidationError(err);
     statusCode = 400;
     message = "Validation error";

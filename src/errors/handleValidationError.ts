@@ -1,17 +1,12 @@
-import mongoose from 'mongoose'
-import { ErrorMessage } from '../interfaces/error.interface'
+import { Prisma } from "@prisma/client";
 
-const handleValidationError = (err: mongoose.Error.ValidationError) => {
-  const errors: ErrorMessage[] = Object.values(err.errors).map(
-    (el: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
-      return {
-        path: el.path,
-        message: el.message,
-      }
+const handleValidationError = (err: Prisma.PrismaClientValidationError) => {
+  return [
+    {
+      path: "",
+      message: err.message,
     },
-  )
+  ];
+};
 
-  return errors
-}
-
-export default handleValidationError
+export default handleValidationError;
