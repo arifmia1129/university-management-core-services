@@ -82,6 +82,16 @@ export const assignCourseFaculty = catchAsync(
     });
   },
 );
+export const removeCourseFaculty = catchAsync(
+  async (req: Request, res: Response) => {
+    await CourseService.removeCourseFacultyService(req.body);
+    sendResponse<CourseFaculty>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully remove course faculties",
+    });
+  },
+);
 export const getCourseFaculty = catchAsync(
   async (req: Request, res: Response) => {
     const result = await CourseService.getCourseFacultyService();

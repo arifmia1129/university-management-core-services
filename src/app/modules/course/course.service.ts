@@ -241,6 +241,25 @@ export const assignCourseFacultyService = async (
     );
   }
 };
+export const removeCourseFacultyService = async (
+  courseFacultyInfo: ICourseFaculty,
+): Promise<void> => {
+  const res = await prisma.courseFaculty.deleteMany({
+    where: {
+      courseId: courseFacultyInfo.courseId,
+      facultyId: {
+        in: courseFacultyInfo.facultiesId,
+      },
+    },
+  });
+
+  if (!res) {
+    throw new ApiError(
+      "Failed to delete course faculty",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+};
 export const getCourseFacultyService = async (): Promise<CourseFaculty[]> => {
   const res = await prisma.courseFaculty.findMany();
 

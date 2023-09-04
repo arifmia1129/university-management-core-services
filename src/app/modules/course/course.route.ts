@@ -27,5 +27,6 @@ router
   );
 
 router.post("/assign-faculties", courseController.assignCourseFaculty);
+router.post("/remove-faculties", courseController.removeCourseFaculty);
 
 export const CourseRouter = router;
