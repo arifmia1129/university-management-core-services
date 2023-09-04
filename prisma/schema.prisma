@@ -11,15 +11,16 @@ datasource db {
 }
 
 model AcademicSemester {
-  id         String    @id @default(uuid())
-  year       Int
-  title      String
-  code       String
-  startMonth String
-  endMonth   String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  students   Student[]
+  id                    String                 @id @default(uuid())
+  year                  Int
+  title                 String
+  code                  String
+  startMonth            String
+  endMonth              String
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  students              Student[]
+  semesterRegistrations SemesterRegistration[]
 
   @@map("academic_semesters")
 }
@@ -155,4 +156,26 @@ model CourseFaculty {
   faculty   Faculty @relation(fields: [facultyId], references: [id])
 
   @@id([courseId, facultyId])
+}
+
+enum SemesterRegistrationStatus {
+  UPCOMING
+  ONGOING
+  ENDED
+}
+
+model SemesterRegistration {
+  id        String                      @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime
+  status    SemesterRegistrationStatus?
+  minCredit Int
+  maxCredit Int
+  createdAt DateTime                    @default(now())
+  updatedAt DateTime                    @updatedAt
+
+  academicSemesterId String
+  academicSemester   AcademicSemester @relation(fields: [academicSemesterId], references: [id])
+
+  @@map("semester_registration")
 }
