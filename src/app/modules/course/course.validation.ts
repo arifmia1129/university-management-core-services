@@ -32,3 +32,14 @@ export const updateCourseValidation = z.object({
       .optional(),
   }),
 });
+
+export const assignOrRemoveCourseFaculties = z.object({
+  body: z.object({
+    courseId: z.string({
+      required_error: "Course Id is required",
+    }),
+    facultiesId: z.array(z.string(), {
+      required_error: "Faculty Id array is required",
+    }),
+  }),
+});

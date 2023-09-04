@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import * as facultyService from "./faculty.service";
 import sendResponse from "../../../shared/sendResponse";
-import { Faculty } from "@prisma/client";
+import { CourseFaculty, Faculty } from "@prisma/client";
 import httpStatus from "../../../shared/httpStatus";
 import pick from "../../../shared/pick";
 import { paginationField } from "../../constant/pagination";
@@ -70,6 +70,38 @@ export const deleteFacultyById = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Successfully deleted Faculty information",
+      data: result,
+    });
+  },
+);
+
+export const assignCourseFaculty = catchAsync(
+  async (req: Request, res: Response) => {
+    await facultyService.assignCourseFacultyService(req.body);
+    sendResponse<CourseFaculty>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully assigned course faculties",
+    });
+  },
+);
+export const removeCourseFaculty = catchAsync(
+  async (req: Request, res: Response) => {
+    await facultyService.removeCourseFacultyService(req.body);
+    sendResponse<CourseFaculty>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully remove course faculties",
+    });
+  },
+);
+export const getCourseFaculty = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await facultyService.getCourseFacultyService();
+    sendResponse<CourseFaculty[]>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully get course faculties",
       data: result,
     });
   },

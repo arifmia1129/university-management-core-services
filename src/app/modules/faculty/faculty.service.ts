@@ -1,4 +1,4 @@
-import { Faculty, Prisma } from "@prisma/client";
+import { CourseFaculty, Faculty, Prisma } from "@prisma/client";
 import {
   Filter,
   Pagination,
@@ -8,6 +8,8 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
 import { facultySearchableField } from "./faculty.constant";
+import { ICourseFaculty } from "./faculty.interface";
+import httpStatus from "../../../shared/httpStatus";
 
 export const createFacultyService = async (
   semester: Faculty,
@@ -113,6 +115,52 @@ export const deleteFacultyById = async (id: string): Promise<Faculty> => {
 
   if (!res) {
     throw new ApiError("Failed to delete Faculty data by id", 404);
+  }
+
+  return res;
+};
+
+export const assignCourseFacultyService = async (
+  courseFacultyInfo: ICourseFaculty,
+): Promise<void> => {
+  const res = await prisma.courseFaculty.createMany({
+    data: courseFacultyInfo.coursesId.map(id => ({
+      facultyId: courseFacultyInfo.facultyId,
+      courseId: id,
+    })),
+  });
+
+  if (!res) {
+    throw new ApiError(
+      "Failed to create course faculty",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+};
+export const removeCourseFacultyService = async (
+  courseFacultyInfo: ICourseFaculty,
+): Promise<void> => {
+  const res = await prisma.courseFaculty.deleteMany({
+    where: {
+      facultyId: courseFacultyInfo.facultyId,
+      courseId: {
+        in: courseFacultyInfo.coursesId,
+      },
+    },
+  });
+
+  if (!res) {
+    throw new ApiError(
+      "Failed to delete course faculty",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+};
+export const getCourseFacultyService = async (): Promise<CourseFaculty[]> => {
+  const res = await prisma.courseFaculty.findMany();
+
+  if (!res) {
+    throw new ApiError("Failed to get course faculty", httpStatus.BAD_REQUEST);
   }
 
   return res;

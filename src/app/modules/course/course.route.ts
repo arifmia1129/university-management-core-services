@@ -26,7 +26,17 @@ router
     courseController.updateCourseById,
   );
 
-router.post("/assign-faculties", courseController.assignCourseFaculty);
-router.post("/remove-faculties", courseController.removeCourseFaculty);
+router.post(
+  "/assign-faculties",
+  requestValidator(CourseValidation.assignOrRemoveCourseFaculties),
+  auth(USER_ROLE_ENUM.ADMIN, USER_ROLE_ENUM.SUPER_ADMIN),
+  courseController.assignCourseFaculty,
+);
+router.post(
+  "/remove-faculties",
+  requestValidator(CourseValidation.assignOrRemoveCourseFaculties),
+  auth(USER_ROLE_ENUM.ADMIN, USER_ROLE_ENUM.SUPER_ADMIN),
+  courseController.removeCourseFaculty,
+);
 
 export const CourseRouter = router;
