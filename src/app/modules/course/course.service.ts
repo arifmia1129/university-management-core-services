@@ -97,6 +97,13 @@ export const getAllCourseService = async (
     orderBy: {
       [sortBy as string]: sortOrder,
     },
+    include: {
+      preRequsite: {
+        include: {
+          preRequisite: true,
+        },
+      },
+    },
   });
 
   const total = await prisma.course.count();
@@ -111,7 +118,7 @@ export const getAllCourseService = async (
   };
 };
 
-export const getCourseById = async (id: string): Promise<Course> => {
+export const getCourseById = async (id: string): Promise<Course | null> => {
   const res = await prisma.course.findUnique({
     where: {
       id,
@@ -126,20 +133,66 @@ export const getCourseById = async (id: string): Promise<Course> => {
 };
 export const updateCourseById = async (
   id: string,
-  data: Partial<Course>,
-): Promise<Course> => {
-  const res = await prisma.course.update({
-    data,
+  data: Partial<ICreateCourse>,
+): Promise<Course | null> => {
+  const { preRequisiteCourses, ...courseData } = data;
+
+  await prisma.$transaction(async tx => {
+    const res = await tx.course.update({
+      data: courseData,
+      where: {
+        id,
+      },
+    });
+
+    if (!res) {
+      throw new ApiError("Failed to update academic semester data by id", 404);
+    }
+
+    if (preRequisiteCourses && preRequisiteCourses.length) {
+      const deletedPreRequisite = preRequisiteCourses.filter(
+        course => course.courseId && course.isDeleted,
+      );
+
+      const newPreRequisite = preRequisiteCourses.filter(
+        course => course.courseId && !course.isDeleted,
+      );
+
+      for (const preRequisite of deletedPreRequisite) {
+        await prisma.courseToPrerequisite.deleteMany({
+          where: {
+            AND: [
+              {
+                courseId: id,
+                preRequisiteId: preRequisite.courseId,
+              },
+            ],
+          },
+        });
+      }
+
+      for (const preRequisite of newPreRequisite) {
+        await prisma.courseToPrerequisite.create({
+          data: {
+            courseId: id,
+            preRequisiteId: preRequisite.courseId,
+          },
+        });
+      }
+    }
+  });
+  return await prisma.course.findUnique({
     where: {
       id,
     },
+    include: {
+      preRequsite: {
+        include: {
+          preRequisite: true,
+        },
+      },
+    },
   });
-
-  if (!res) {
-    throw new ApiError("Failed to update academic semester data by id", 404);
-  }
-
-  return res;
 };
 export const deleteCourseById = async (id: string): Promise<Course> => {
   const res = await prisma.course.delete({
