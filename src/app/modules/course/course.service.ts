@@ -1,4 +1,4 @@
-import { Course, Prisma } from "@prisma/client";
+import { Course, CourseFaculty, Prisma } from "@prisma/client";
 import {
   Filter,
   Pagination,
@@ -8,8 +8,13 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
 import { courseSearchableField } from "./course.constant";
-import { ICreateCourse, PreRequisiteCourse } from "./course.interface";
+import {
+  ICourseFaculty,
+  ICreateCourse,
+  PreRequisiteCourse,
+} from "./course.interface";
 import { asyncForEach } from "../../../shared/utils";
+import httpStatus from "../../../shared/httpStatus";
 
 export const createCourseService = async (
   course: ICreateCourse,
@@ -215,6 +220,32 @@ export const deleteCourseById = async (id: string): Promise<Course> => {
 
   if (!res) {
     throw new ApiError("Failed to delete Course data by id", 404);
+  }
+
+  return res;
+};
+export const assignCourseFacultyService = async (
+  courseFacultyInfo: ICourseFaculty,
+): Promise<void> => {
+  const res = await prisma.courseFaculty.createMany({
+    data: courseFacultyInfo.facultiesId.map(id => ({
+      courseId: courseFacultyInfo.courseId,
+      facultyId: id,
+    })),
+  });
+
+  if (!res) {
+    throw new ApiError(
+      "Failed to create course faculty",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+};
+export const getCourseFacultyService = async (): Promise<CourseFaculty[]> => {
+  const res = await prisma.courseFaculty.findMany();
+
+  if (!res) {
+    throw new ApiError("Failed to get course faculty", httpStatus.BAD_REQUEST);
   }
 
   return res;

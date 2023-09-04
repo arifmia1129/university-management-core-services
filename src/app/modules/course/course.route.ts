@@ -15,7 +15,7 @@ router.post(
   requestValidator(CourseValidation.createCourseValidation),
   courseController.createCourse,
 );
-
+router.get("/faculties", courseController.getCourseFaculty);
 router
   .route("/:id")
   .get(courseController.getCourseById)
@@ -25,5 +25,7 @@ router
     requestValidator(CourseValidation.updateCourseValidation),
     courseController.updateCourseById,
   );
+
+router.post("/assign-faculties", courseController.assignCourseFaculty);
 
 export const CourseRouter = router;

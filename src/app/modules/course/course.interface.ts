@@ -9,3 +9,8 @@ export type ICreateCourse = {
   credits: number;
   preRequisiteCourses: PreRequisiteCourse[];
 };
+
+export type ICourseFaculty = {
+  courseId: string;
+  facultiesId: string[];
+};
