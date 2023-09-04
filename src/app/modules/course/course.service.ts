@@ -8,7 +8,8 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
 import { courseSearchableField } from "./course.constant";
-import { ICreateCourse } from "./course.interface";
+import { ICreateCourse, PreRequisiteCourse } from "./course.interface";
+import { asyncForEach } from "../../../shared/utils";
 
 export const createCourseService = async (
   course: ICreateCourse,
@@ -24,13 +25,18 @@ export const createCourseService = async (
       throw new ApiError("Failed to create course", 400);
     }
 
-    for (const preRequisiteCourse of preRequisiteCourses) {
-      await tx.courseToPrerequisite.create({
-        data: {
-          courseId: res.id,
-          preRequisiteId: preRequisiteCourse.courseId,
+    if (preRequisiteCourses && preRequisiteCourses.length) {
+      await asyncForEach(
+        preRequisiteCourses,
+        async (preRequisiteCourse: PreRequisiteCourse) => {
+          await tx.courseToPrerequisite.create({
+            data: {
+              courseId: res.id,
+              preRequisiteId: preRequisiteCourse.courseId,
+            },
+          });
         },
-      });
+      );
     }
 
     return res;
@@ -158,27 +164,33 @@ export const updateCourseById = async (
         course => course.courseId && !course.isDeleted,
       );
 
-      for (const preRequisite of deletedPreRequisite) {
-        await prisma.courseToPrerequisite.deleteMany({
-          where: {
-            AND: [
-              {
-                courseId: id,
-                preRequisiteId: preRequisite.courseId,
-              },
-            ],
-          },
-        });
-      }
+      await asyncForEach(
+        deletedPreRequisite,
+        async (preRequisite: PreRequisiteCourse) => {
+          await prisma.courseToPrerequisite.deleteMany({
+            where: {
+              AND: [
+                {
+                  courseId: id,
+                  preRequisiteId: preRequisite.courseId,
+                },
+              ],
+            },
+          });
+        },
+      );
 
-      for (const preRequisite of newPreRequisite) {
-        await prisma.courseToPrerequisite.create({
-          data: {
-            courseId: id,
-            preRequisiteId: preRequisite.courseId,
-          },
-        });
-      }
+      await asyncForEach(
+        newPreRequisite,
+        async (preRequisite: PreRequisiteCourse) => {
+          await prisma.courseToPrerequisite.create({
+            data: {
+              courseId: id,
+              preRequisiteId: preRequisite.courseId,
+            },
+          });
+        },
+      );
     }
   });
   return await prisma.course.findUnique({
