@@ -23,10 +23,10 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     errorMessages = handleValidationError(err);
     statusCode = 400;
     message = "Validation error";
-  } else if (err.name === "CastError") {
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     errorMessages = handleCastError(err);
     statusCode = 400;
-    message = "Cast error";
+    message = "Request error";
   } else if (err instanceof ZodError) {
     errorMessages = handleZodError(err);
     statusCode = 400;

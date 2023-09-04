@@ -8,6 +8,8 @@ import { buildingRouter } from "../modules/building/building.route";
 import { RoomRouter } from "../modules/room/room.route";
 import { CourseRouter } from "../modules/course/course.route";
 import { semesterRegistrationRouter } from "../modules/semesterRegistration/semesterRegistration.route";
+import { offeredCourseRouter } from "../modules/offeredCourse/offeredCourse.route";
+import { offeredCourseSectionRouter } from "../modules/offeredCourseSection/offeredCourseSection.route";
 
 const router = Router();
 
@@ -21,6 +23,8 @@ const moduleRoutes = [
   { path: "/room", route: RoomRouter },
   { path: "/course", route: CourseRouter },
   { path: "/semester-registration", route: semesterRegistrationRouter },
+  { path: "/offered-course", route: offeredCourseRouter },
+  { path: "/offered-couse-section", route: offeredCourseSectionRouter },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
