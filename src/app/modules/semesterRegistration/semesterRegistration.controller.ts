@@ -11,6 +11,7 @@ import {
   Pagination,
 } from "../../../interfaces/databaseQuery.interface";
 import { semesterRegistrationFilterableField } from "./semesterRegistration.constant";
+import { IStudentSemesterRegistration } from "./semesterRegistration.interface";
 
 export const createSemesterRegistration = catchAsync(
   async (req: Request, res: Response) => {
@@ -88,6 +89,20 @@ export const deleteSemesterRegistrationById = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Successfully deleted semester registration information",
+      data: result,
+    });
+  },
+);
+export const studentSemesterRegistration = catchAsync(
+  async (req: Request, res: Response) => {
+    const result =
+      await semesterRegistrationService.studentSemesterRegistrationService(
+        req?.user?.userId,
+      );
+    sendResponse<IStudentSemesterRegistration>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully semester registration done",
       data: result,
     });
   },

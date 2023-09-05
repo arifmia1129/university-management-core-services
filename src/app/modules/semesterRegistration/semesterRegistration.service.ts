@@ -13,6 +13,7 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
 import { semesterRegistrationSearchableField } from "./semesterRegistration.constant";
 import httpStatus from "../../../shared/httpStatus";
+import { IStudentSemesterRegistration } from "./semesterRegistration.interface";
 
 export const createSemesterRegistrationService = async (
   semester: SemesterRegistration,
@@ -178,4 +179,67 @@ export const deleteSemesterRegistrationById = async (
   }
 
   return res;
+};
+
+export const studentSemesterRegistrationService = async (
+  userId: string,
+): Promise<IStudentSemesterRegistration> => {
+  const isStudentExist = await prisma.student.findFirst({
+    where: {
+      studentId: userId,
+    },
+  });
+
+  if (!isStudentExist) {
+    throw new ApiError(
+      "Failed to retrieved student information by id",
+      httpStatus.NOT_FOUND,
+    );
+  }
+
+  const isExistOngoingSemesterRegistration =
+    await prisma.semesterRegistration.findFirst({
+      where: {
+        status: SemesterRegistrationStatus.ONGOING,
+      },
+    });
+
+  if (!isExistOngoingSemesterRegistration) {
+    throw new ApiError(
+      "Semester registration is not yet started",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  let studentSemesterRegistration;
+
+  studentSemesterRegistration =
+    await prisma.studentSemesterRegistration.findFirst({
+      where: {
+        studentId: userId,
+        semesterRegistrationId: isExistOngoingSemesterRegistration.id,
+      },
+    });
+
+  if (!studentSemesterRegistration) {
+    studentSemesterRegistration =
+      await prisma.studentSemesterRegistration.create({
+        data: {
+          student: {
+            connect: {
+              id: isStudentExist.id,
+            },
+          },
+          semesterRegistration: {
+            connect: {
+              id: isExistOngoingSemesterRegistration.id,
+            },
+          },
+        },
+      });
+  }
+  return {
+    semesterRegistration: isExistOngoingSemesterRegistration,
+    studentSemesterRegistration,
+  };
 };
