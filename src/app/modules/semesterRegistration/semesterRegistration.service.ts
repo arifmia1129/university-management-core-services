@@ -5,6 +5,8 @@ import {
   StudentSemesterRegistrationCourse,
   StudentSemesterRegistration,
   AcademicSemester,
+  OfferedCourse,
+  Course,
 } from "@prisma/client";
 import {
   Filter,
@@ -21,6 +23,7 @@ import {
   IStudentSemesterRegistration,
 } from "./semesterRegistration.interface";
 import { studentSemesterRegistrationCourseService } from "../studentSemesterRegistrationCourse/studentSemesterRegistrationCourse.service";
+import { asyncForEach } from "../../../shared/utils";
 
 export const createSemesterRegistrationService = async (
   semester: SemesterRegistration,
@@ -419,7 +422,7 @@ export const startAcademicSemesterService = async (
         isCurrent: false,
       },
     });
-    return await tx.academicSemester.update({
+    const res = await tx.academicSemester.update({
       where: {
         id: semesterRegistration.academicSemesterId,
       },
@@ -427,6 +430,68 @@ export const startAcademicSemesterService = async (
         isCurrent: true,
       },
     });
+
+    const studentSemesterRegistrations =
+      await prisma.studentSemesterRegistration.findMany({
+        where: {
+          semesterRegistration: {
+            id: semesterRegistrationId,
+          },
+          isConfirmed: true,
+        },
+      });
+
+    asyncForEach(
+      studentSemesterRegistrations,
+      async (semester: StudentSemesterRegistration) => {
+        const registrationCourses =
+          await prisma.studentSemesterRegistrationCourse.findMany({
+            where: {
+              semesterRegistrationId: semesterRegistrationId,
+              studentId: semester.studentId,
+            },
+            include: {
+              offeredCourse: {
+                include: {
+                  course: true,
+                },
+              },
+            },
+          });
+        asyncForEach(
+          registrationCourses,
+          async (
+            course: StudentSemesterRegistrationCourse & {
+              offeredCourse: OfferedCourse & {
+                course: Course;
+              };
+            },
+          ) => {
+            const isAlreadyExist = await prisma.studentEnrolledCourse.findFirst(
+              {
+                where: {
+                  studentId: course.studentId,
+                  courseId: course.offeredCourse.courseId,
+                  academicSemesterId: semesterRegistration.academicSemesterId,
+                },
+              },
+            );
+
+            if (!isAlreadyExist) {
+              await prisma.studentEnrolledCourse.create({
+                data: {
+                  studentId: course.studentId,
+                  courseId: course.offeredCourse.courseId,
+                  academicSemesterId: semesterRegistration.academicSemesterId,
+                },
+              });
+            }
+          },
+        );
+      },
+    );
+
+    return res;
   });
 
   return updatedSemester;
