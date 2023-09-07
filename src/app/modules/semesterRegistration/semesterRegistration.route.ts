@@ -14,11 +14,13 @@ router.post(
 );
 router.post(
   "/course-enroll",
+  requestValidator(semesterValidation.enrollOrWithrewCourseValidation),
   auth(USER_ROLE_ENUM.STUDENT),
   semesterRegistrationController.studentSemesterRegistrationCourseEnroll,
 );
 router.post(
   "/course-withdrew",
+  requestValidator(semesterValidation.enrollOrWithrewCourseValidation),
   auth(USER_ROLE_ENUM.STUDENT),
   semesterRegistrationController.studentSemesterRegistrationCourseWithdrew,
 );
