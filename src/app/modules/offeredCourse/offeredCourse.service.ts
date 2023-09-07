@@ -87,6 +87,7 @@ export const getAllOfferedCourseService = async (
     include: {
       academicDepartment: true,
       semesterRegistration: true,
+      course: true,
     },
   });
 

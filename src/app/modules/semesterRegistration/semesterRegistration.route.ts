@@ -12,6 +12,16 @@ router.post(
   auth(USER_ROLE_ENUM.STUDENT),
   semesterRegistrationController.studentSemesterRegistration,
 );
+router.post(
+  "/course-enroll",
+  auth(USER_ROLE_ENUM.STUDENT),
+  semesterRegistrationController.studentSemesterRegistrationCourseEnroll,
+);
+router.post(
+  "/course-withdrew",
+  auth(USER_ROLE_ENUM.STUDENT),
+  semesterRegistrationController.studentSemesterRegistrationCourseWithdrew,
+);
 
 router.get("/", semesterRegistrationController.getAllSemesterRegistration);
 
