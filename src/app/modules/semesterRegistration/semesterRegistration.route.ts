@@ -43,6 +43,11 @@ router.post(
   requestValidator(semesterValidation.createSemesterRegistrationValidation),
   semesterRegistrationController.createSemesterRegistration,
 );
+router.post(
+  "/:id/start-semester",
+  auth(USER_ROLE_ENUM.ADMIN, USER_ROLE_ENUM.SUPER_ADMIN),
+  semesterRegistrationController.startAcademicSemester,
+);
 
 router
   .route("/:id")

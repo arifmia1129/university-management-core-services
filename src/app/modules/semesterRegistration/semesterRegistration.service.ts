@@ -4,6 +4,7 @@ import {
   SemesterRegistrationStatus,
   StudentSemesterRegistrationCourse,
   StudentSemesterRegistration,
+  AcademicSemester,
 } from "@prisma/client";
 import {
   Filter,
@@ -375,4 +376,46 @@ export const getRegistrationService = async (
   }
 
   return studentSemesterRegistration;
+};
+export const startAcademicSemesterService = async (
+  semesterRegistrationId: string,
+): Promise<AcademicSemester> => {
+  const semesterRegistration = await prisma.semesterRegistration.findUnique({
+    where: {
+      id: semesterRegistrationId,
+    },
+    include: {
+      academicSemester: true,
+    },
+  });
+
+  if (!semesterRegistration) {
+    throw new ApiError(
+      "Semester registration info not found",
+      httpStatus.NOT_FOUND,
+    );
+  }
+
+  if (semesterRegistration.status !== SemesterRegistrationStatus.ENDED) {
+    throw new ApiError(
+      "Semester registration is not ended.",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  if (semesterRegistration.academicSemester.isCurrent) {
+    throw new ApiError(
+      "Academic semester is already started",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  return await prisma.academicSemester.update({
+    where: {
+      id: semesterRegistration.academicSemesterId,
+    },
+    data: {
+      isCurrent: true,
+    },
+  });
 };

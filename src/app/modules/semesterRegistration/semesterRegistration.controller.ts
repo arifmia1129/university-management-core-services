@@ -3,6 +3,7 @@ import catchAsync from "../../../shared/catchAsync";
 import * as semesterRegistrationService from "./semesterRegistration.service";
 import sendResponse from "../../../shared/sendResponse";
 import {
+  AcademicSemester,
   SemesterRegistration,
   StudentSemesterRegistration,
   StudentSemesterRegistrationCourse,
@@ -162,6 +163,20 @@ export const getRegistration = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Registration data fetched",
+      data: result,
+    });
+  },
+);
+export const startAcademicSemester = catchAsync(
+  async (req: Request, res: Response) => {
+    const result =
+      await semesterRegistrationService.startAcademicSemesterService(
+        req?.params.id,
+      );
+    sendResponse<AcademicSemester>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Academic semester started",
       data: result,
     });
   },
