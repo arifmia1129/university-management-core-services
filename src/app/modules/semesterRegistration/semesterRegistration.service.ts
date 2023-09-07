@@ -3,6 +3,7 @@ import {
   Prisma,
   SemesterRegistrationStatus,
   StudentSemesterRegistrationCourse,
+  StudentSemesterRegistration,
 } from "@prisma/client";
 import {
   Filter,
@@ -266,4 +267,112 @@ export const withdrewCourseService = async (
     studentId,
     payload,
   );
+};
+
+export const confirmRegistrationService = async (
+  studentId: string,
+): Promise<StudentSemesterRegistration> => {
+  const isOngoingSemesterRegistrationExist =
+    await prisma.semesterRegistration.findFirst({
+      where: {
+        status: SemesterRegistrationStatus.ONGOING,
+      },
+    });
+
+  if (!isOngoingSemesterRegistrationExist) {
+    throw new ApiError(
+      "Semester registration is closed now",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+  const studentSemesterRegistration =
+    await prisma.studentSemesterRegistration.findFirst({
+      where: {
+        student: {
+          studentId,
+        },
+        semesterRegistrationId: isOngoingSemesterRegistrationExist.id,
+      },
+    });
+
+  if (!studentSemesterRegistration) {
+    throw new ApiError(
+      "Student semester registration is not found",
+      httpStatus.NOT_FOUND,
+    );
+  }
+
+  const { totalCreditsTaken } = studentSemesterRegistration;
+  const { maxCredit, minCredit } = isOngoingSemesterRegistrationExist;
+
+  if (!totalCreditsTaken) {
+    throw new ApiError(
+      "You have no enrolled courses for registration",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  if (totalCreditsTaken < minCredit || totalCreditsTaken > maxCredit) {
+    throw new ApiError(
+      `Your enrolled courses credits must be between ${minCredit} to ${maxCredit}`,
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  const res = await prisma.studentSemesterRegistration.update({
+    where: {
+      id: studentSemesterRegistration.id,
+    },
+    data: {
+      isConfirmed: true,
+    },
+  });
+
+  if (!res) {
+    throw new ApiError(
+      "Failed to complete registration",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  return res;
+};
+export const getRegistrationService = async (
+  studentId: string,
+): Promise<StudentSemesterRegistration> => {
+  const isOngoingSemesterRegistrationExist =
+    await prisma.semesterRegistration.findFirst({
+      where: {
+        status: SemesterRegistrationStatus.ONGOING,
+      },
+    });
+
+  if (!isOngoingSemesterRegistrationExist) {
+    throw new ApiError(
+      "Semester registration is closed now",
+      httpStatus.BAD_REQUEST,
+    );
+  }
+  const studentSemesterRegistration =
+    await prisma.studentSemesterRegistration.findFirst({
+      where: {
+        student: {
+          studentId,
+        },
+        semesterRegistrationId: isOngoingSemesterRegistrationExist.id,
+      },
+      include: {
+        semesterRegistration: true,
+        student: true,
+      },
+    });
+
+  if (!studentSemesterRegistration) {
+    throw new ApiError(
+      "Student semester registration is not found",
+      httpStatus.NOT_FOUND,
+    );
+  }
+
+  return studentSemesterRegistration;
 };

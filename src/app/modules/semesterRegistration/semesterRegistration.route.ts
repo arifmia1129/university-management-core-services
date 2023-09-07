@@ -7,10 +7,20 @@ import { USER_ROLE_ENUM } from "../../../enums/user.enum";
 
 const router = express.Router();
 
+router.get(
+  "/my-registration",
+  auth(USER_ROLE_ENUM.STUDENT),
+  semesterRegistrationController.getRegistration,
+);
 router.post(
   "/student",
   auth(USER_ROLE_ENUM.STUDENT),
   semesterRegistrationController.studentSemesterRegistration,
+);
+router.post(
+  "/confirm-registration",
+  auth(USER_ROLE_ENUM.STUDENT),
+  semesterRegistrationController.confirmRegistration,
 );
 router.post(
   "/course-enroll",

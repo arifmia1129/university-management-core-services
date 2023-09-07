@@ -4,6 +4,7 @@ import * as semesterRegistrationService from "./semesterRegistration.service";
 import sendResponse from "../../../shared/sendResponse";
 import {
   SemesterRegistration,
+  StudentSemesterRegistration,
   StudentSemesterRegistrationCourse,
 } from "@prisma/client";
 import httpStatus from "../../../shared/httpStatus";
@@ -135,6 +136,32 @@ export const studentSemesterRegistrationCourseWithdrew = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Successfully withdrewed course",
+      data: result,
+    });
+  },
+);
+export const confirmRegistration = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await semesterRegistrationService.confirmRegistrationService(
+      req?.user?.userId,
+    );
+    sendResponse<StudentSemesterRegistration>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Congratulations! your registration is confirmed",
+      data: result,
+    });
+  },
+);
+export const getRegistration = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await semesterRegistrationService.getRegistrationService(
+      req?.user?.userId,
+    );
+    sendResponse<StudentSemesterRegistration>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Registration data fetched",
       data: result,
     });
   },
