@@ -410,12 +410,24 @@ export const startAcademicSemesterService = async (
     );
   }
 
-  return await prisma.academicSemester.update({
-    where: {
-      id: semesterRegistration.academicSemesterId,
-    },
-    data: {
-      isCurrent: true,
-    },
+  const updatedSemester = await prisma.$transaction(async tx => {
+    await tx.academicSemester.updateMany({
+      where: {
+        isCurrent: true,
+      },
+      data: {
+        isCurrent: false,
+      },
+    });
+    return await tx.academicSemester.update({
+      where: {
+        id: semesterRegistration.academicSemesterId,
+      },
+      data: {
+        isCurrent: true,
+      },
+    });
   });
+
+  return updatedSemester;
 };
