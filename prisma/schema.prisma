@@ -11,18 +11,20 @@ datasource db {
 }
 
 model AcademicSemester {
-  id                    String                  @id @default(uuid())
-  year                  Int
-  title                 String
-  code                  String
-  startMonth            String
-  endMonth              String
-  isCurrent             Boolean                 @default(false)
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  students              Student[]
-  semesterRegistrations SemesterRegistration[]
-  StudentEnrolledCourse StudentEnrolledCourse[]
+  id                        String                      @id @default(uuid())
+  year                      Int
+  title                     String
+  code                      String
+  startMonth                String
+  endMonth                  String
+  isCurrent                 Boolean                     @default(false)
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  students                  Student[]
+  semesterRegistrations     SemesterRegistration[]
+  StudentEnrolledCourse     StudentEnrolledCourse[]
+  StudentEnrolledCourseMark StudentEnrolledCourseMark[]
+  studentSemesterPayment    StudentSemesterPayment[]
 
   @@map("academic_semesters")
 }
@@ -80,6 +82,8 @@ model Student {
   studentSemesterRegistrations       StudentSemesterRegistration[]
   studentSemesterRegistrationCourses StudentSemesterRegistrationCourse[]
   StudentEnrolledCourse              StudentEnrolledCourse[]
+  StudentEnrolledCourseMark          StudentEnrolledCourseMark[]
+  studentSemesterPayment             StudentSemesterPayment[]
 
   @@map("students")
 }
@@ -313,10 +317,11 @@ model StudentEnrolledCourse {
   academicSemesterId String
   academicSemester   AcademicSemester @relation(fields: [academicSemesterId], references: [id])
 
-  grade      String?
-  point      Float                       @default(0)
-  totalMarks Int                         @default(0)
-  status     StudentEnrolledCourseStatus @default(ONGOING)
+  grade                     String?
+  point                     Float                       @default(0)
+  totalMarks                Int                         @default(0)
+  status                    StudentEnrolledCourseStatus @default(ONGOING)
+  StudentEnrolledCourseMark StudentEnrolledCourseMark[]
 
   @@map("student_enrolled_course")
 }
@@ -325,4 +330,51 @@ enum StudentEnrolledCourseStatus {
   ONGOING
   COMPLETED
   WITHDREWN
+}
+
+model StudentEnrolledCourseMark {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentId               String
+  student                 Student               @relation(fields: [studentId], references: [id])
+  studentEnrolledCourseId String
+  studentEnrolledCourse   StudentEnrolledCourse @relation(fields: [studentEnrolledCourseId], references: [id])
+  academicSemesterId      String
+  acaedemicSemester       AcademicSemester      @relation(fields: [academicSemesterId], references: [id])
+  grade                   String?
+  marks                   Int                   @default(0)
+  examType                ExamType?
+
+  @@map("student_enrolled_course_mark")
+}
+
+enum ExamType {
+  MIDTERM
+  FINAL
+}
+
+model StudentSemesterPayment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentId            String
+  student              Student          @relation(fields: [studentId], references: [id])
+  academicSemesterId   String
+  academicSemester     AcademicSemester @relation(fields: [academicSemesterId], references: [id])
+  fullPaymentAmount    Int              @default(0)
+  partialPaymentAmount Int              @default(0)
+  totalDueAmount       Int?             @default(0)
+  totalPaidAmount      Int              @default(0)
+  paymentStatus        paymentStatus    @default(PENDING)
+
+  @@map("student_semester_payment")
+}
+
+enum paymentStatus {
+  PENDING
+  PARTIAL_PAID
+  FULL_PAIN
 }
