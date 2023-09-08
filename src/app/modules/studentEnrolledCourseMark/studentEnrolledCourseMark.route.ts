@@ -8,6 +8,11 @@ router
   .get(StudentEnrolledCourseMarkController.getStudentMarks)
   .patch(StudentEnrolledCourseMarkController.updateStudentMarks);
 
+router.patch(
+  "/total-final",
+  StudentEnrolledCourseMarkController.updateStudentTotalFinalMarks,
+);
+
 const studentEnrolledCourseMarkRouter = router;
 
 export default studentEnrolledCourseMarkRouter;

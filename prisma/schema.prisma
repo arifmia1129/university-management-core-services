@@ -84,6 +84,7 @@ model Student {
   StudentEnrolledCourse              StudentEnrolledCourse[]
   StudentEnrolledCourseMark          StudentEnrolledCourseMark[]
   studentSemesterPayment             StudentSemesterPayment[]
+  StudentAcademicInfo                StudentAcademicInfo[]
 
   @@map("students")
 }
@@ -377,4 +378,16 @@ enum paymentStatus {
   PENDING
   PARTIAL_PAID
   FULL_PAIN
+}
+
+model StudentAcademicInfo {
+  id                   String   @id @default(uuid())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  studentId            String
+  student              Student  @relation(fields: [studentId], references: [id])
+  totalCompletedCredit Int?     @default(0)
+  cgpa                 Float?   @default(0)
+
+  @@map("student_academic_info")
 }
