@@ -1,4 +1,4 @@
-import { Student, Prisma } from "@prisma/client";
+import { Student, Prisma, StudentEnrolledCourse } from "@prisma/client";
 import {
   Filter,
   Pagination,
@@ -113,6 +113,35 @@ export const deleteStudentById = async (id: string): Promise<Student> => {
 
   if (!res) {
     throw new ApiError("Failed to delete student data by id", 404);
+  }
+
+  return res;
+};
+export const myCourseService = async (
+  studentId: string,
+  filter: Filter,
+): Promise<StudentEnrolledCourse[] | null> => {
+  const semesterRegistration = await prisma.academicSemester.findFirst({
+    where: {
+      isCurrent: true,
+    },
+  });
+
+  if (!filter.academicSemesterId) {
+    filter.academicSemesterId = semesterRegistration?.id;
+  }
+
+  const res = await prisma.studentEnrolledCourse.findMany({
+    where: {
+      student: {
+        studentId,
+      },
+      ...filter,
+    },
+  });
+
+  if (!res) {
+    throw new ApiError("Failed to get student course", 404);
   }
 
   return res;

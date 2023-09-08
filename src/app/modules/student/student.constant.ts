@@ -14,3 +14,4 @@ export const studentFilterableField = [
   "contactNo",
   "searchTerm",
 ];
+export const studentCourseFilterableField = ["academicSemesterId", "courseId"];

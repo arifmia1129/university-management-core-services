@@ -8,6 +8,11 @@ import { USER_ROLE_ENUM } from "../../../enums/user.enum";
 const router = express.Router();
 
 router.get("/", studentController.getAllStudent);
+router.get(
+  "/my-course",
+  auth(USER_ROLE_ENUM.STUDENT),
+  studentController.myCourse,
+);
 
 router.post(
   "/create",
