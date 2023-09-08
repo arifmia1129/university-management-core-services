@@ -3,9 +3,10 @@ import prisma from "../../../shared/prisma";
 import { hasTimeConflict } from "../../../shared/utils";
 import ApiError from "../../../errors/ApiError";
 import httpStatus from "../../../shared/httpStatus";
+import { Schedule } from "../offeredCourseSection/offeredCourseSection.service";
 
 export const checkRoomAvailablity = async (
-  data: OfferedCourseClassSchedule,
+  data: OfferedCourseClassSchedule | Schedule,
 ) => {
   const existingSlots = await prisma.offeredCourseClassSchedule.findMany({
     where: {
@@ -31,7 +32,7 @@ export const checkRoomAvailablity = async (
   }
 };
 export const checkFacultyAvailablity = async (
-  data: OfferedCourseClassSchedule,
+  data: OfferedCourseClassSchedule | Schedule,
 ) => {
   const existingSlots = await prisma.offeredCourseClassSchedule.findMany({
     where: {
