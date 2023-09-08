@@ -1,4 +1,8 @@
-import { ExamType, PrismaClient } from "@prisma/client";
+import {
+  ExamType,
+  PrismaClient,
+  StudentEnrolledCourseMark,
+} from "@prisma/client";
 import {
   DefaultArgs,
   PrismaClientOptions,
@@ -11,7 +15,7 @@ export type CreateMark = {
   academicSemesterId: string;
 };
 
-export const createStudentEnrolledCourseMarkService = async (
+const createStudentEnrolledCourseMarkService = async (
   tx: Omit<
     PrismaClient<PrismaClientOptions, never, DefaultArgs>,
     "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
@@ -59,10 +63,22 @@ export const createStudentEnrolledCourseMarkService = async (
   }
 };
 
+const getlAllStudentMarksService = async (): Promise<
+  StudentEnrolledCourseMark[]
+> => {
+  return await prisma.studentEnrolledCourseMark.findMany();
+};
+
 const updateStudentMarksService = async (payload: any) => {
   console.log(payload);
 };
 
-export const studentEnrolledCourseMarkService = {
+const studentEnrolledCourseMarkService = {
   updateStudentMarksService,
+};
+
+export const StudentEnrolledCourseMarkService = {
+  createStudentEnrolledCourseMarkService,
+  updateStudentMarksService,
+  getlAllStudentMarksService,
 };

@@ -1,12 +1,12 @@
 import express from "express";
-import { studentEnrolledCourseMarkController } from "./studentEnrolledCourseMark.controller";
+import { StudentEnrolledCourseMarkController } from "./studentEnrolledCourseMark.controller";
 
 const router = express.Router();
 
 router
   .route("/")
-
-  .patch(studentEnrolledCourseMarkController.updateStudentMarks);
+  .get(StudentEnrolledCourseMarkController.getStudentMarks)
+  .patch(StudentEnrolledCourseMarkController.updateStudentMarks);
 
 const studentEnrolledCourseMarkRouter = router;
 

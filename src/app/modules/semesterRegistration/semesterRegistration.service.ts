@@ -28,8 +28,8 @@ import {
   CreatePayment,
   createSemesterPayment,
 } from "../studentSemesterPayment/studentSemesterPayment.service";
-import { createStudentEnrolledCourseMarkService } from "../studentEnrolledCourseMark/studentEnrolledCourseMark.service";
 import { studentEnrolledCourseService } from "../studentEnrolledCourse/studentEnrolledCourse.service";
+import { StudentEnrolledCourseMarkService } from "../studentEnrolledCourseMark/studentEnrolledCourseMark.service";
 
 export const createSemesterRegistrationService = async (
   semester: SemesterRegistration,
@@ -491,11 +491,14 @@ export const startAcademicSemesterService = async (
               });
 
             if (enrolledCourse) {
-              await createStudentEnrolledCourseMarkService(tx, {
-                studentEnrolledCourseId: enrolledCourse.id,
-                studentId: enrolledCourse.studentId,
-                academicSemesterId: semesterRegistration.academicSemesterId,
-              });
+              await StudentEnrolledCourseMarkService.createStudentEnrolledCourseMarkService(
+                tx,
+                {
+                  studentEnrolledCourseId: enrolledCourse.id,
+                  studentId: enrolledCourse.studentId,
+                  academicSemesterId: semesterRegistration.academicSemesterId,
+                },
+              );
             }
           },
         );
