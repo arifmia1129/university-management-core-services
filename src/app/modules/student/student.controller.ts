@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import * as studentService from "./student.service";
 import sendResponse from "../../../shared/sendResponse";
-import { Student, StudentEnrolledCourse } from "@prisma/client";
+import {
+  Student,
+  StudentEnrolledCourse,
+  StudentSemesterRegistration,
+} from "@prisma/client";
 import httpStatus from "../../../shared/httpStatus";
 import pick from "../../../shared/pick";
 import { paginationField } from "../../constant/pagination";
@@ -90,3 +94,31 @@ export const myCourse = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+export const myCourseClassScheduels = catchAsync(
+  async (req: Request, res: Response) => {
+    const filters: Filter = pick(req.query, studentCourseFilterableField);
+    const result = await studentService.myCourseScheduelService(
+      req?.user?.studentId,
+      filters,
+    );
+    sendResponse<StudentSemesterRegistration[]>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully get student courses",
+      data: result,
+    });
+  },
+);
+export const myAcademicInfo = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await studentService.myAcademicInfoService(
+      req?.user?.studentId,
+    );
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully get student courses",
+      data: result,
+    });
+  },
+);

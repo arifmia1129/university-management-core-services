@@ -13,6 +13,16 @@ router.get(
   auth(USER_ROLE_ENUM.STUDENT),
   studentController.myCourse,
 );
+router.get(
+  "/my-academic-info",
+  auth(USER_ROLE_ENUM.STUDENT),
+  studentController.myAcademicInfo,
+);
+router.get(
+  "/my-course-scheduels",
+  auth(USER_ROLE_ENUM.STUDENT),
+  studentController.myCourseClassScheduels,
+);
 
 router.post(
   "/create",

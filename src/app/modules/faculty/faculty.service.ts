@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CourseFaculty, Faculty, Prisma } from "@prisma/client";
 import {
   Filter,
@@ -164,4 +165,76 @@ export const getCourseFacultyService = async (): Promise<CourseFaculty[]> => {
   }
 
   return res;
+};
+export const getMyCoursesService = async (
+  facultyId: string,
+  filters: Filter,
+) => {
+  if (!filters.academicSemesterId) {
+    const semester = await prisma.academicSemester.findFirst({
+      where: {
+        isCurrent: true,
+      },
+    });
+
+    filters.academicSemesterId = semester?.id;
+  }
+  // console.log(filters);
+
+  const offeredCourseSection = await prisma.offeredCourseSection.findMany({
+    where: {
+      offeredCourseClassSchedules: {
+        some: {
+          faculty: {
+            facultyId,
+          },
+        },
+      },
+      offeredCourse: {
+        semesterRegistration: {
+          academicSemester: {
+            id: filters.academicSemesterId as string,
+          },
+        },
+      },
+    },
+    include: {
+      offeredCourse: {
+        include: {
+          course: true,
+        },
+      },
+      offeredCourseClassSchedules: true,
+    },
+  });
+
+  const facultiesCourses = offeredCourseSection.reduce((acc: any, obj: any) => {
+    const course = obj.offeredCourse.course;
+    const classSchedules = obj.offeredCourseClassSchedule;
+
+    const existingCourse = acc.find(
+      (item: any) => item.course.id === course.id,
+    );
+
+    if (existingCourse) {
+      existingCourse.sections.push({
+        section: obj,
+        classSchedules,
+      });
+    } else {
+      acc.push({
+        course,
+        sections: [
+          {
+            section: obj,
+            classSchedules,
+          },
+        ],
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return facultiesCourses;
 };

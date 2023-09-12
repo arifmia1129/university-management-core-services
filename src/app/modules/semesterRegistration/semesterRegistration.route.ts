@@ -17,6 +17,11 @@ router.post(
   auth(USER_ROLE_ENUM.STUDENT),
   semesterRegistrationController.studentSemesterRegistration,
 );
+router.get(
+  "/student/my-semester-registration",
+  auth(USER_ROLE_ENUM.STUDENT),
+  semesterRegistrationController.getMySemesterRegistration,
+);
 router.post(
   "/confirm-registration",
   auth(USER_ROLE_ENUM.STUDENT),

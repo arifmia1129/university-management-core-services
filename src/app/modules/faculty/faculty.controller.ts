@@ -106,3 +106,16 @@ export const getCourseFaculty = catchAsync(
     });
   },
 );
+export const getMyCourses = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
+
+  const filters: Filter = pick(req.body, ["academicSemesterId", "courseId"]);
+
+  const result = await facultyService.getMyCoursesService(userId, filters);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Successfully get my courses",
+    data: result,
+  });
+});

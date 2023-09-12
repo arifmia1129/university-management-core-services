@@ -17,6 +17,7 @@ type Slot = {
 export const hasTimeConflict = (existingSlots: Slot[], newSlot: Slot) => {
   for (const slot of existingSlots) {
     const existingStartHours = slot.startTime.split(":")[0];
+
     const existingStartMinutes = slot.startTime.split(":")[1];
     const existingEndHours = slot.endTime.split(":")[0];
     const existingEndMinutes = slot.endTime.split(":")[1];

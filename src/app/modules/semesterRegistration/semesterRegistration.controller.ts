@@ -181,3 +181,16 @@ export const startAcademicSemester = catchAsync(
     });
   },
 );
+export const getMySemesterRegistration = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await semesterRegistrationService.getMySemesterRegistration(
+      req?.user?.userId,
+    );
+    sendResponse<AcademicSemester>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "My semester registration",
+      data: result,
+    });
+  },
+);

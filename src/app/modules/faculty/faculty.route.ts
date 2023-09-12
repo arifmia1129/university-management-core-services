@@ -8,6 +8,11 @@ import auth from "../../middleware/auth";
 const router = express.Router();
 
 router.get("/", facultyController.getAllFaculty);
+router.get(
+  "/my-courses",
+  auth(USER_ROLE_ENUM.FACULTY),
+  facultyController.getMyCourses,
+);
 
 router.post(
   "/create",
