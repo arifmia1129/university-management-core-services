@@ -6,12 +6,16 @@ import {
 } from "../../../interfaces/databaseQuery.interface";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import {
+  EVENT_CREATED_ACADEMIC_SEMESTER,
+  EVENT_DELETED_ACADEMIC_SEMESTER,
+  EVENT_UPDATED_ACADEMIC_SEMESTER,
   academicSemesterSearchableField,
   academicSemesterTitleWithCode,
 } from "./academicSemester.constant";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
 import httpStatus from "../../../shared/httpStatus";
+import { RedisClient } from "../../../shared/redis";
 
 export const createAcademicSemesterService = async (
   semester: AcademicSemester,
@@ -20,9 +24,15 @@ export const createAcademicSemesterService = async (
     throw new ApiError("Invalid semester code", httpStatus.BAD_REQUEST);
   }
 
-  return await prisma.academicSemester.create({
+  const res = await prisma.academicSemester.create({
     data: semester,
   });
+
+  if (res) {
+    RedisClient.publish(EVENT_CREATED_ACADEMIC_SEMESTER, JSON.stringify(res));
+  }
+
+  return res;
 };
 
 export const getAllAcademicSemesterService = async (
@@ -111,6 +121,8 @@ export const updateAcademicSemesterById = async (
     throw new ApiError("Failed to update academic semester data by id", 404);
   }
 
+  RedisClient.publish(EVENT_UPDATED_ACADEMIC_SEMESTER, JSON.stringify(res));
+
   return res;
 };
 export const deleteAcademicSemesterById = async (
@@ -125,6 +137,6 @@ export const deleteAcademicSemesterById = async (
   if (!res) {
     throw new ApiError("Failed to delete academic semester data by id", 404);
   }
-
+  RedisClient.publish(EVENT_DELETED_ACADEMIC_SEMESTER, JSON.stringify(res));
   return res;
 };
