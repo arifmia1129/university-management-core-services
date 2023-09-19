@@ -5,13 +5,21 @@ import {
   ResponseWithPagination,
 } from "../../../interfaces/databaseQuery.interface";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { academicSemesterSearchableField } from "./academicSemester.constant";
+import {
+  academicSemesterSearchableField,
+  academicSemesterTitleWithCode,
+} from "./academicSemester.constant";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
+import httpStatus from "../../../shared/httpStatus";
 
 export const createAcademicSemesterService = async (
   semester: AcademicSemester,
 ): Promise<AcademicSemester> => {
+  if (academicSemesterTitleWithCode[semester.title] !== semester.code) {
+    throw new ApiError("Invalid semester code", httpStatus.BAD_REQUEST);
+  }
+
   return await prisma.academicSemester.create({
     data: semester,
   });

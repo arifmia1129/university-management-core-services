@@ -11,3 +11,9 @@ export const academicSemesterFilterableField = [
   "searchTerm",
   "code",
 ];
+
+export const academicSemesterTitleWithCode: { [key: string]: string } = {
+  Autumn: "01",
+  Summer: "02",
+  Fall: "03",
+};
