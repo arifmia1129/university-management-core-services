@@ -5,16 +5,28 @@ import {
   ResponseWithPagination,
 } from "../../../interfaces/databaseQuery.interface";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { academicDepartmentSearchableField } from "./academicDepartment.constant";
+import {
+  EVENT_CREATED_ACADEMIC_DEPARTMENT,
+  EVENT_DELETED_ACADEMIC_DEPARTMENT,
+  EVENT_UPDATED_ACADEMIC_DEPARTMENT,
+  academicDepartmentSearchableField,
+} from "./academicDepartment.constant";
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiError";
+import { RedisClient } from "../../../shared/redis";
 
 export const createAcademicDepartmentService = async (
   Department: AcademicDepartment,
 ): Promise<AcademicDepartment> => {
-  return await prisma.academicDepartment.create({
+  const res = await prisma.academicDepartment.create({
     data: Department,
   });
+
+  if (res) {
+    RedisClient.publish(EVENT_CREATED_ACADEMIC_DEPARTMENT, JSON.stringify(res));
+  }
+
+  return res;
 };
 
 export const getAllAcademicDepartmentService = async (
@@ -112,6 +124,8 @@ export const updateAcademicDepartmentById = async (
     throw new ApiError("Failed to update academic Department data by id", 404);
   }
 
+  RedisClient.publish(EVENT_UPDATED_ACADEMIC_DEPARTMENT, JSON.stringify(res));
+
   return res;
 };
 export const deleteAcademicDepartmentById = async (
@@ -126,6 +140,8 @@ export const deleteAcademicDepartmentById = async (
   if (!res) {
     throw new ApiError("Failed to delete academic Department data by id", 404);
   }
+
+  RedisClient.publish(EVENT_DELETED_ACADEMIC_DEPARTMENT, JSON.stringify(res));
 
   return res;
 };
