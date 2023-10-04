@@ -15,3 +15,5 @@ export const studentFilterableField = [
   "searchTerm",
 ];
 export const studentCourseFilterableField = ["academicSemesterId", "courseId"];
+
+export const EVENT_CREATE_STUDENT = "createStudentEvent";

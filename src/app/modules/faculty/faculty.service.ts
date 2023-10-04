@@ -12,9 +12,7 @@ import { facultySearchableField } from "./faculty.constant";
 import { ICourseFaculty } from "./faculty.interface";
 import httpStatus from "../../../shared/httpStatus";
 
-export const createFacultyService = async (
-  semester: Faculty,
-): Promise<Faculty> => {
+export const createFacultyService = async (semester: any): Promise<Faculty> => {
   return await prisma.faculty.create({
     data: semester,
   });
@@ -106,6 +104,35 @@ export const updateFacultyById = async (
   }
 
   return res;
+};
+export const updateFacultyFromEvent = async (event: any): Promise<void> => {
+  const info = {
+    facultyId: event?.id,
+    designation: event?.designation,
+    firstName: event?.name?.firstName,
+    lastName: event?.name?.lastName,
+    middleName: event?.name?.middleName,
+    profileImage: event?.profileImage,
+    email: event?.email,
+    contactNo: parseInt(event?.contactNo),
+    gender: event?.gender,
+    bloodGroup: event?.bloodGroup,
+    academicDepartmentId: event?.academicDepartment?.syncId,
+    academicFacultyId: event?.academicFaculty?.syncId,
+  };
+
+  const faculty = await prisma.faculty.findFirst({
+    where: {
+      facultyId: info.facultyId,
+    },
+  });
+
+  await prisma.faculty.update({
+    where: {
+      id: faculty?.id,
+    },
+    data: info,
+  });
 };
 export const deleteFacultyById = async (id: string): Promise<Faculty> => {
   const res = await prisma.faculty.delete({
@@ -237,4 +264,23 @@ export const getMyCoursesService = async (
   }, []);
 
   return facultiesCourses;
+};
+
+export const createFacultyFromEventService = async (event: any) => {
+  const info: Partial<Faculty> = {
+    facultyId: event?.id,
+    designation: event?.designation,
+    firstName: event?.name?.firstName,
+    lastName: event?.name?.lastName,
+    middleName: event?.name?.middleName,
+    profileImage: event?.profileImage,
+    email: event?.email,
+    contactNo: parseInt(event?.contactNo),
+    gender: event?.gender,
+    bloodGroup: event?.bloodGroup,
+    academicDepartmentId: event?.academicDepartment?.syncId,
+    academicFacultyId: event?.academicFaculty?.syncId,
+  };
+
+  await createFacultyService(info);
 };

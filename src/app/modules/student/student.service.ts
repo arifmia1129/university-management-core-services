@@ -16,12 +16,11 @@ import ApiError from "../../../errors/ApiError";
 import { studentSearchableField } from "./student.constant";
 import { studentUtils } from "./student.utils";
 
-export const createStudentService = async (
-  semester: Student,
-): Promise<Student> => {
-  return await prisma.student.create({
+export const createStudentService = async (semester: any): Promise<Student> => {
+  const res = await prisma.student.create({
     data: semester,
   });
+  return res;
 };
 
 export const getAllStudentService = async (
@@ -232,4 +231,26 @@ export const myAcademicInfoService = async (studentId: string) => {
     academicInfo,
     courses: groupByAcademicSemester,
   };
+};
+
+export const createStudentFromEventService = async (event: any) => {
+  const info: Partial<Student> = {
+    studentId: event?.id,
+    firstName: event?.name?.firstName,
+    lastName: event?.name?.lastName,
+    middleName: event?.name?.middleName,
+    profileImage: event?.profileImage,
+    email: event?.email,
+    contactNo: parseInt(event?.contactNo),
+    gender: event?.gender,
+    bloodGroup: event?.bloodGroup,
+
+    academicSemesterId: event?.academicSemester?.syncId,
+
+    academicDepartmentId: event?.academicDepartment?.syncId,
+
+    academicFacultyId: event?.academicFaculty?.syncId,
+  };
+
+  await createStudentService(info);
 };
