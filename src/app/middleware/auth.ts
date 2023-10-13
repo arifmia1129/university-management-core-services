@@ -9,7 +9,6 @@ const auth = (...authorizedRole: Array<string>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
-
       // check token given or not
       if (!token) {
         throw new ApiError("You are unauthorized", httpStatus.UNAUTHORIZED);

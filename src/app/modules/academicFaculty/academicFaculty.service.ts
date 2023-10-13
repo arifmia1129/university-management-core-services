@@ -66,6 +66,7 @@ export const getAllAcademicFacultyService = async (
 
   const result = await prisma.academicFaculty.findMany({
     where: whereConditions,
+
     skip,
     take: limit,
     orderBy: {

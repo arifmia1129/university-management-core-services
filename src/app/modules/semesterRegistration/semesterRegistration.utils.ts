@@ -28,10 +28,10 @@ const getAvailableCourses = (
       const isAlreadyTaken = pendingCourses.find(
         (cr: any) => cr.offeredCourseId === course.id,
       );
-
       if (isAlreadyTaken) {
-        course?.offerCourseSections?.map((section: any) => {
-          if (section.id === isAlreadyTaken.offeredCourseId) {
+        course?.offeredCourseSections?.map((section: any) => {
+          // console.log(isAlreadyTaken);
+          if (section.id === isAlreadyTaken.offeredCourseSectionId) {
             section.isTaken = true;
           } else {
             section.isTaken = false;

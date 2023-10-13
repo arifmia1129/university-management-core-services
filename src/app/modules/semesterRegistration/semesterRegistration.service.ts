@@ -101,6 +101,9 @@ export const getAllSemesterRegistrationService = async (
     where: whereConditions,
     skip,
     take: limit,
+    include: {
+      academicSemester: true,
+    },
     orderBy: {
       [sortBy as string]: sortOrder,
     },
@@ -284,6 +287,16 @@ export const withdrewCourseService = async (
 export const confirmRegistrationService = async (
   studentId: string,
 ): Promise<StudentSemesterRegistration> => {
+  const isStudentExist = await prisma.student.findFirst({
+    where: {
+      studentId,
+    },
+  });
+
+  if (!isStudentExist) {
+    throw new ApiError("Student does not exist", httpStatus.NOT_FOUND);
+  }
+
   const isOngoingSemesterRegistrationExist =
     await prisma.semesterRegistration.findFirst({
       where: {
@@ -297,12 +310,11 @@ export const confirmRegistrationService = async (
       httpStatus.BAD_REQUEST,
     );
   }
+
   const studentSemesterRegistration =
     await prisma.studentSemesterRegistration.findFirst({
       where: {
-        student: {
-          studentId,
-        },
+        studentId: isStudentExist.id,
         semesterRegistrationId: isOngoingSemesterRegistrationExist.id,
       },
     });
@@ -317,19 +329,19 @@ export const confirmRegistrationService = async (
   const { totalCreditsTaken } = studentSemesterRegistration;
   const { maxCredit, minCredit } = isOngoingSemesterRegistrationExist;
 
-  if (!totalCreditsTaken) {
-    throw new ApiError(
-      "You have no enrolled courses for registration",
-      httpStatus.BAD_REQUEST,
-    );
-  }
+  // if (!totalCreditsTaken) {
+  //   throw new ApiError(
+  //     "You have no enrolled courses for registration",
+  //     httpStatus.BAD_REQUEST,
+  //   );
+  // }
 
-  if (totalCreditsTaken < minCredit || totalCreditsTaken > maxCredit) {
-    throw new ApiError(
-      `Your enrolled courses credits must be between ${minCredit} to ${maxCredit}`,
-      httpStatus.BAD_REQUEST,
-    );
-  }
+  // if (totalCreditsTaken < minCredit || totalCreditsTaken > maxCredit) {
+  //   throw new ApiError(
+  //     `Your enrolled courses credits must be between ${minCredit} to ${maxCredit}`,
+  //     httpStatus.BAD_REQUEST,
+  //   );
+  // }
 
   const res = await prisma.studentSemesterRegistration.update({
     where: {
@@ -556,17 +568,16 @@ export const getMySemesterRegistration = async (studentId: string) => {
     },
   });
 
-  // console.log(completedCourses);
-
   const studentPendingCourses =
     await prisma.studentSemesterRegistrationCourse.findMany({
       where: {
-        studentId,
+        studentId: isStudentExist.id,
         semesterRegistrationId: isSemesterRegistrationAvailable.id,
       },
+      include: {
+        offeredCourseSection: true,
+      },
     });
-
-  // console.log(studentPendingCourses);
 
   const offeredCourses = await prisma.offeredCourse.findMany({
     where: {
@@ -583,6 +594,20 @@ export const getMySemesterRegistration = async (studentId: string) => {
           },
         },
       },
+      offeredCourseSections: {
+        include: {
+          offeredCourseClassSchedules: true,
+          semesterRegistration: true,
+          offeredCourse: {
+            include: {
+              course: true,
+            },
+          },
+        },
+      },
+      academicDepartment: true,
+      semesterRegistration: true,
+      studentSemesterRegistrationCourses: true,
     },
   });
   return semesterRegistrationUtils.getAvailableCourses(

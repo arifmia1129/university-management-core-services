@@ -55,6 +55,9 @@ export const getAllRoomService = async (
     where: whereConditions,
     skip,
     take: limit,
+    include: {
+      building: true,
+    },
     orderBy: {
       [sortBy as string]: sortOrder,
     },

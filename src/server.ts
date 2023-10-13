@@ -1,50 +1,36 @@
 import app from "./app";
 import config from "./config";
-import { errorLogger, infoLogger } from "./shared/logger";
-import { Server } from "http";
+import { infoLogger, errorLogger } from "./shared/logger";
 import { RedisClient } from "./shared/redis";
 import subscribeEvents from "./app/events";
 
-let server: Server;
-
-process.on("uncaughtException", err => {
-  if (server) {
-    server.close(() => {
-      errorLogger.error(err);
-      process.exit(1);
-    });
-  } else {
-    errorLogger.error(err);
-    process.exit(1);
-  }
-});
-async function main() {
+async function startServer() {
   try {
     await RedisClient.connect();
     await subscribeEvents();
-    server = app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
       infoLogger.info(`Application is listening on port ${config.port}`);
     });
-  } catch (error) {
-    errorLogger.error("Failed to connect database", error);
-  }
 
-  process.on("unhandledRejection", err => {
-    if (server) {
+    process.on("SIGTERM", () => {
       server.close(() => {
-        errorLogger.error(err);
-        process.exit(1);
+        infoLogger.info("Server is gracefully shutting down.");
+        process.exit(0);
       });
-    } else {
-      errorLogger.error(err);
+    });
+
+    process.on("unhandledRejection", (reason, promise) => {
+      errorLogger.error("Unhandled Rejection at:", reason, "Promise:", promise);
+    });
+
+    process.on("uncaughtException", error => {
+      errorLogger.error("Uncaught Exception:", error);
       process.exit(1);
-    }
-  });
+    });
+  } catch (error) {
+    errorLogger.error("Failed to start the server:", error);
+    process.exit(1);
+  }
 }
 
-main();
-
-process.on("SIGTERM", () => {
-  infoLogger.info("SIGTERM received");
-  process.exit(1);
-});
+startServer();

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import catchAsync from "../../../shared/catchAsync";
 import * as facultyService from "./faculty.service";
@@ -38,6 +39,26 @@ export const getAllFaculty = catchAsync(async (req: Request, res: Response) => {
     data: result.data,
   });
 });
+
+export const getMyCourseStudent = catchAsync(
+  async (req: Request, res: Response) => {
+    const filters: Filter = pick(req.query, facultyFilterableField);
+    const paginationOptions: Pagination = pick(req.query, paginationField);
+
+    const result = await facultyService.getMyCourseStudents(
+      filters,
+      paginationOptions,
+    );
+    sendResponse<any[]>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully created Faculty",
+      meta: result.meta,
+      data: result.data,
+    });
+  },
+);
+
 export const getFacultyById = catchAsync(
   async (req: Request, res: Response) => {
     const result = await facultyService.getFacultyById(req.params.id);

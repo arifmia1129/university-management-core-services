@@ -37,6 +37,8 @@ export const createOfferedCourseSectionService = async (
 ): Promise<OfferedCourseSection> => {
   const { classSchedules, ...offeredCourseData } = payload;
 
+  // console.log(payload);
+
   const isExist = await prisma.offeredCourse.findFirst({
     where: {
       id: offeredCourseData.offeredCourseId,
@@ -73,7 +75,6 @@ export const createOfferedCourseSectionService = async (
     ...offeredCourseData,
     semesterRegistrationId: isExist.semesterRegistrationId,
   };
-
   const offeredCourse = await prisma.$transaction(async tx => {
     const section = await tx.offeredCourseSection.create({
       data: updatedPayload,

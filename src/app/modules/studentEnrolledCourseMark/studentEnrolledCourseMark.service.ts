@@ -74,7 +74,13 @@ const createStudentEnrolledCourseMarkService = async (
 const getlAllStudentMarksService = async (): Promise<
   StudentEnrolledCourseMark[]
 > => {
-  return await prisma.studentEnrolledCourseMark.findMany();
+  return await prisma.studentEnrolledCourseMark.findMany({
+    include: {
+      studentEnrolledCourse: true,
+      acaedemicSemester: true,
+      student: true,
+    },
+  });
 };
 
 const updateStudentMarksService = async (payload: {
@@ -88,12 +94,20 @@ const updateStudentMarksService = async (payload: {
 
   const isExist = await prisma.studentEnrolledCourseMark.findFirst({
     where: {
+      examType,
       studentId,
       academicSemesterId,
       studentEnrolledCourse: {
         courseId,
       },
-      examType,
+    },
+    include: {
+      studentEnrolledCourse: {
+        include: {
+          StudentEnrolledCourseMark: true,
+        },
+      },
+      acaedemicSemester: true,
     },
   });
 
@@ -210,6 +224,7 @@ const updateStudentTotalFinalMarksService = async (payload: {
       },
     });
   }
+
   return res;
 };
 

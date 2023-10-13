@@ -144,6 +144,9 @@ export const myCourseService = async (
       },
       ...filter,
     },
+    include: {
+      course: true,
+    },
   });
 
   if (!res) {
@@ -194,7 +197,13 @@ export const myCourseScheduelService = async (
       },
       offeredCourseSection: {
         include: {
-          offeredCourseClassSchedules: true,
+          offeredCourseClassSchedules: {
+            include: {
+              faculty: true,
+              offeredCourseSection: true,
+              room: true,
+            },
+          },
         },
       },
     },

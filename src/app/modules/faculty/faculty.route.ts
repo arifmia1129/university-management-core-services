@@ -14,6 +14,12 @@ router.get(
   facultyController.getMyCourses,
 );
 
+router.get(
+  "/my-course-student",
+  auth(USER_ROLE_ENUM.FACULTY),
+  facultyController.getMyCourseStudent,
+);
+
 router.post(
   "/create",
   auth(USER_ROLE_ENUM.ADMIN, USER_ROLE_ENUM.SUPER_ADMIN),
