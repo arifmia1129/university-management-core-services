@@ -6,6 +6,11 @@ import { USER_ROLE_ENUM } from "../../../enums/user.enum";
 const router = express.Router();
 
 router.get("/", StudentSemesterPaymentController.getAllStudentSemesterPayment);
+router.get(
+  "/my-payment",
+  auth(USER_ROLE_ENUM.STUDENT),
+  StudentSemesterPaymentController.getMySemesterPayment,
+);
 
 router.post(
   "/initiate-payment",

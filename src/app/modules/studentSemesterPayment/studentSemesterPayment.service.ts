@@ -115,6 +115,76 @@ const getAllStudentPaymentCourseService = async (
     data: result,
   };
 };
+const getMySemesterPayment = async (
+  filters: Filter,
+  options: Pagination,
+  studentId: string,
+): Promise<ResponseWithPagination<StudentSemesterPayment[]>> => {
+  const { limit, skip, sortOrder, sortBy } =
+    paginationHelper.calculatePagination(options);
+
+  const andConditions = [];
+
+  const { searchTerm, ...filterData } = filters;
+
+  const isStudentExist = await prisma.student.findFirst({
+    where: {
+      studentId,
+    },
+  });
+
+  if (!isStudentExist) {
+    throw new ApiError("Student not found", httpStatus.NOT_FOUND);
+  }
+
+  andConditions.push({
+    studentId: isStudentExist.id,
+  });
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: studentSemesterPaymentSearchableField.map(field => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length) {
+    andConditions.push({
+      AND: Object.keys(filterData).map(key => ({
+        [key]: {
+          equals: filterData[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.StudentSemesterPaymentWhereInput =
+    andConditions?.length ? { AND: andConditions } : {};
+
+  const result = await prisma.studentSemesterPayment.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy as string]: sortOrder,
+    },
+  });
+
+  const total = result.length;
+
+  return {
+    meta: {
+      total,
+      page: 1,
+      limit: 1,
+    },
+    data: result,
+  };
+};
 
 const initiatePayment = async (payload: any, user: any) => {
   const isStudentExist = await prisma.student.findFirst({
@@ -275,4 +345,5 @@ export const StudentSemesterPaymentService = {
   getAllStudentPaymentCourseService,
   initiatePayment,
   completePayment,
+  getMySemesterPayment,
 };

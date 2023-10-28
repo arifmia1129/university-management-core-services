@@ -35,6 +35,28 @@ const getAllStudentSemesterPayment = catchAsync(
     });
   },
 );
+const getMySemesterPayment = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user as JwtPayload;
+
+  const filters: Filter = pick(
+    req.query,
+    studentSemesterPaymentFilterableField,
+  );
+  const paginationOptions: Pagination = pick(req.query, paginationField);
+
+  const result = await StudentSemesterPaymentService.getMySemesterPayment(
+    filters,
+    paginationOptions,
+    userId,
+  );
+  sendResponse<StudentSemesterPayment[]>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Successfully get my semester payment",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 const initiatePayment = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
@@ -66,4 +88,5 @@ export const StudentSemesterPaymentController = {
   getAllStudentSemesterPayment,
   initiatePayment,
   completePayment,
+  getMySemesterPayment,
 };
