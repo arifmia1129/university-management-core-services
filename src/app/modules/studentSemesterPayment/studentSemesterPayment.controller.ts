@@ -50,8 +50,20 @@ const initiatePayment = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const completePayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await StudentSemesterPaymentService.completePayment(
+    req.body.transactionId,
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Successfully completed payment",
+    data: result,
+  });
+});
 
 export const StudentSemesterPaymentController = {
   getAllStudentSemesterPayment,
   initiatePayment,
+  completePayment,
 };

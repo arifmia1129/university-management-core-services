@@ -384,7 +384,7 @@ model StudentSemesterPaymentHistory {
   dueAmount     Int           @default(0)
   paidAmount    Int           @default(0)
   paymentMethod paymentMethod @default(ONLINE)
-  isPaid        Boolean?      @default(true)
+  isPaid        Boolean?      @default(false)
 
   @@map("student_semester_payment_histories")
 }

@@ -12,6 +12,11 @@ router.post(
   auth(USER_ROLE_ENUM.STUDENT),
   StudentSemesterPaymentController.initiatePayment,
 );
+router.post(
+  "/complete-payment",
+  auth(USER_ROLE_ENUM.STUDENT),
+  StudentSemesterPaymentController.completePayment,
+);
 
 router
   .route("/:id")

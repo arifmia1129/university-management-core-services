@@ -205,7 +205,74 @@ const initiatePayment = async (payload: any, user: any) => {
   }
 };
 
+const completePayment = async (transactionId: string) => {
+  const isTransHistoryExist =
+    await prisma.studentSemesterPaymentHistory.findFirst({
+      where: {
+        transactionId,
+      },
+    });
+
+  if (!isTransHistoryExist) {
+    throw new ApiError("Transaction history not found", httpStatus.NOT_FOUND);
+  }
+
+  if (isTransHistoryExist.isPaid) {
+    throw new ApiError("Transaction already completed", httpStatus.BAD_REQUEST);
+  }
+
+  const isStudentSemesterPaymentExist =
+    await prisma.studentSemesterPayment.findUnique({
+      where: {
+        id: isTransHistoryExist.studentSemesterPaymentId,
+      },
+    });
+
+  if (!isStudentSemesterPaymentExist) {
+    throw new ApiError(
+      "Student semester payment information not found",
+      httpStatus.NOT_FOUND,
+    );
+  }
+
+  await prisma.$transaction(async tx => {
+    await tx.studentSemesterPaymentHistory.update({
+      where: {
+        id: isTransHistoryExist.id,
+      },
+      data: {
+        isPaid: true,
+        paidAmount: isTransHistoryExist.dueAmount,
+        dueAmount: 0,
+      },
+    });
+
+    const res = await tx.studentSemesterPayment.update({
+      where: {
+        id: isStudentSemesterPaymentExist.id,
+      },
+      data: {
+        totalPaidAmount:
+          isStudentSemesterPaymentExist.totalPaidAmount +
+          isTransHistoryExist.paidAmount,
+        totalDueAmount:
+          (isStudentSemesterPaymentExist?.totalDueAmount as number) -
+          isTransHistoryExist.paidAmount,
+
+        paymentStatus:
+          (isStudentSemesterPaymentExist.totalDueAmount as number) -
+            isTransHistoryExist.dueAmount ===
+          0
+            ? paymentStatus.FULL_PAID
+            : paymentStatus.PARTIAL_PAID,
+      },
+    });
+    return res;
+  });
+};
+
 export const StudentSemesterPaymentService = {
   getAllStudentPaymentCourseService,
   initiatePayment,
+  completePayment,
 };
