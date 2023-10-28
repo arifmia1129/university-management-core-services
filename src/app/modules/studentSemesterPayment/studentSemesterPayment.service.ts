@@ -1,4 +1,10 @@
-import { Prisma, PrismaClient, StudentSemesterPayment } from "@prisma/client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Prisma,
+  PrismaClient,
+  StudentSemesterPayment,
+  paymentStatus,
+} from "@prisma/client";
 import {
   DefaultArgs,
   PrismaClientOptions,
@@ -11,6 +17,8 @@ import {
 } from "../../../interfaces/databaseQuery.interface";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { studentSemesterPaymentSearchableField } from "./studentSemesterPayment.constant";
+import ApiError from "../../../errors/ApiError";
+import httpStatus from "../../../shared/httpStatus";
 
 export type CreatePayment = {
   studentId: string;
@@ -106,6 +114,34 @@ const getAllStudentPaymentCourseService = async (
   };
 };
 
+const initiatePayment = async (payload: any, user: any) => {
+  const isStudentExist = await prisma.student.findFirst({
+    where: {
+      studentId: user.userId,
+    },
+  });
+
+  if (!isStudentExist) {
+    throw new ApiError("Student not found", httpStatus.NOT_FOUND);
+  }
+
+  const studentPaymentInfo = await prisma.studentSemesterPayment.findFirst({
+    where: {
+      academicSemesterId: payload?.academicSemesterId,
+      studentId: payload?.studentId,
+    },
+  });
+
+  if (!studentPaymentInfo) {
+    throw new ApiError(`Student payment info not found`, httpStatus.NOT_FOUND);
+  }
+
+  if (studentPaymentInfo.paymentStatus === paymentStatus.FULL_PAID) {
+    throw new ApiError(`Student payment already paid`, httpStatus.BAD_REQUEST);
+  }
+};
+
 export const StudentSemesterPaymentService = {
   getAllStudentPaymentCourseService,
+  initiatePayment,
 };

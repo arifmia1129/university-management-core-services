@@ -361,23 +361,43 @@ model StudentSemesterPayment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  studentId            String
-  student              Student          @relation(fields: [studentId], references: [id])
-  academicSemesterId   String
-  academicSemester     AcademicSemester @relation(fields: [academicSemesterId], references: [id])
-  fullPaymentAmount    Int              @default(0)
-  partialPaymentAmount Int              @default(0)
-  totalDueAmount       Int?             @default(0)
-  totalPaidAmount      Int              @default(0)
-  paymentStatus        paymentStatus    @default(PENDING)
+  studentId                     String
+  student                       Student                         @relation(fields: [studentId], references: [id])
+  academicSemesterId            String
+  academicSemester              AcademicSemester                @relation(fields: [academicSemesterId], references: [id])
+  fullPaymentAmount             Int                             @default(0)
+  partialPaymentAmount          Int                             @default(0)
+  totalDueAmount                Int?                            @default(0)
+  totalPaidAmount               Int                             @default(0)
+  paymentStatus                 paymentStatus                   @default(PENDING)
+  StudentSemesterPaymentHistory StudentSemesterPaymentHistory[]
 
   @@map("student_semester_payment")
+}
+
+model StudentSemesterPaymentHistory {
+  id                       String                 @id @default(uuid())
+  studentSemesterPayment   StudentSemesterPayment @relation(fields: [studentSemesterPaymentId], references: [id])
+  studentSemesterPaymentId String
+
+  transactionId String
+  dueAmount     Int           @default(0)
+  paidAmount    Int           @default(0)
+  paymentMethod paymentMethod @default(ONLINE)
+  isPaid        Boolean?      @default(true)
+
+  @@map("student_semester_payment_histories")
 }
 
 enum paymentStatus {
   PENDING
   PARTIAL_PAID
-  FULL_PAIN
+  FULL_PAID
+}
+
+enum paymentMethod {
+  ONLINE
+  CASH
 }
 
 model StudentAcademicInfo {
