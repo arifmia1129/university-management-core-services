@@ -19,6 +19,8 @@ import { paginationHelper } from "../../../helpers/paginationHelper";
 import { studentSemesterPaymentSearchableField } from "./studentSemesterPayment.constant";
 import ApiError from "../../../errors/ApiError";
 import httpStatus from "../../../shared/httpStatus";
+import axios from "axios";
+import config from "../../../config";
 
 export type CreatePayment = {
   studentId: string;
@@ -138,6 +140,28 @@ const initiatePayment = async (payload: any, user: any) => {
 
   if (studentPaymentInfo.paymentStatus === paymentStatus.FULL_PAID) {
     throw new ApiError(`Student payment already paid`, httpStatus.BAD_REQUEST);
+  }
+
+  const studentPaymentHistory =
+    await prisma.studentSemesterPaymentHistory.findFirst({
+      where: {
+        studentSemesterPaymentId: studentPaymentInfo.id,
+        isPaid: false,
+      },
+    });
+
+  if (!studentPaymentHistory) {
+    const { data } = await axios.post(config.payment_method.url as string, {
+      totalFee: (studentPaymentInfo.totalDueAmount as number) + 100,
+      transId: "123",
+      studentId: isStudentExist.studentId,
+      studentName: isStudentExist.firstName + " " + isStudentExist.lastName,
+      studentEmail: isStudentExist.email,
+      address: "Gazipur, Dhaka",
+      contactNo: isStudentExist.contactNo,
+    });
+
+    return data.data;
   }
 };
 

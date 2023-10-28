@@ -19,4 +19,7 @@ export default {
     url: process.env.REDIS_URL,
     access_token_expires_in: process.env.REDIS_ACCESS_TOKEN_EXPIRES_IN,
   },
+  payment_method: {
+    url: process.env.PAYMENT_URL,
+  },
 };
