@@ -132,6 +132,9 @@ const initiatePayment = async (payload: any, user: any) => {
       academicSemesterId: payload?.academicSemesterId,
       studentId: payload?.studentId,
     },
+    include: {
+      academicSemester: true,
+    },
   });
 
   if (!studentPaymentInfo) {
@@ -150,10 +153,47 @@ const initiatePayment = async (payload: any, user: any) => {
       },
     });
 
-  if (!studentPaymentHistory) {
+  if (studentPaymentHistory) {
     const { data } = await axios.post(config.payment_method.url as string, {
-      totalFee: (studentPaymentInfo.totalDueAmount as number) + 100,
-      transId: "123",
+      totalFee: (studentPaymentHistory.dueAmount as number) + 100,
+      transId: studentPaymentHistory.transactionId,
+      studentId: isStudentExist.studentId,
+      studentName: isStudentExist.firstName + " " + isStudentExist.lastName,
+      studentEmail: isStudentExist.email,
+      address: "Gazipur, Dhaka",
+      contactNo: isStudentExist.contactNo,
+    });
+
+    return data.data;
+  } else {
+    let payableAmount = 0;
+    if (
+      payload.paymentType === "PARTIAL" &&
+      studentPaymentInfo.totalPaidAmount === 0
+    ) {
+      payableAmount = studentPaymentInfo.partialPaymentAmount;
+    } else {
+      payableAmount = studentPaymentInfo.totalDueAmount as number;
+    }
+
+    const dataForInsert = {
+      studentSemesterPaymentId: studentPaymentInfo.id,
+      transactionId: `${isStudentExist.id}-${
+        studentPaymentInfo.academicSemester.title
+      }-${Date.now()}`,
+      dueAmount: payableAmount,
+      paidAmount: 0,
+    };
+
+    const newPaymentHistory = await prisma.studentSemesterPaymentHistory.create(
+      {
+        data: dataForInsert,
+      },
+    );
+
+    const { data } = await axios.post(config.payment_method.url as string, {
+      totalFee: (newPaymentHistory.dueAmount as number) + 100,
+      transId: newPaymentHistory.transactionId,
       studentId: isStudentExist.studentId,
       studentName: isStudentExist.firstName + " " + isStudentExist.lastName,
       studentEmail: isStudentExist.email,
