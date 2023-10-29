@@ -25,7 +25,7 @@ router.post(
 
 router
   .route("/:id")
-  .get(StudentSemesterPaymentController.getAllStudentSemesterPayment);
+  .get(StudentSemesterPaymentController.getStudentSemesterPaymentById);
 
 const StudentSemesterPaymentRouter = router;
 

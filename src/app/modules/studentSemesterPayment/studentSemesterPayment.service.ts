@@ -341,9 +341,18 @@ const completePayment = async (transactionId: string) => {
   });
 };
 
+const getPaymentById = async (id: string) => {
+  return await prisma.studentSemesterPayment.findUnique({
+    where: {
+      id,
+    },
+  });
+};
+
 export const StudentSemesterPaymentService = {
   getAllStudentPaymentCourseService,
   initiatePayment,
   completePayment,
   getMySemesterPayment,
+  getPaymentById,
 };

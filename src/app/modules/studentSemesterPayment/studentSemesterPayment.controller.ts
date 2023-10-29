@@ -35,6 +35,19 @@ const getAllStudentSemesterPayment = catchAsync(
     });
   },
 );
+const getStudentSemesterPaymentById = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await StudentSemesterPaymentService.getPaymentById(
+      req.params.id,
+    );
+    sendResponse<StudentSemesterPayment>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Successfully get payment with id",
+      data: result,
+    });
+  },
+);
 const getMySemesterPayment = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user as JwtPayload;
 
@@ -89,4 +102,5 @@ export const StudentSemesterPaymentController = {
   initiatePayment,
   completePayment,
   getMySemesterPayment,
+  getStudentSemesterPaymentById,
 };
